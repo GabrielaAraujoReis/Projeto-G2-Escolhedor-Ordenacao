@@ -68,17 +68,6 @@ python medir.py
 
 No estado atual, esse comando informa que o benchmark está pendente e não produz resultados. Os dados experimentais deverão ser registrados em `resultados/` antes de preencher a tabela do [relatório](RELATORIO.md).
 
-## Limitações conhecidas
-
-- Os seis módulos de algoritmo ainda contêm apenas as interfaces; nenhuma ordenação está implementada.
-- `escolher(v)` ainda não possui regras de seleção; por isso `ordenar(v)` ainda não pode ordenar uma entrada.
-- `medir.py` ainda não gera as listas dos quatro cenários nem mede tempos.
-- Os testes estão intencionalmente ignorados até a implementação dos métodos; não devem ser interpretados como aprovação funcional.
-- A ordenação por contagem pode exigir memória excessiva se `k` for grande. O seletor deverá verificar a faixa antes de escolher esse método.
-- O tratamento de valores negativos na ordenação por base ainda deverá ser definido e testado.
-- A ordenação rápida pode atingir o pior caso `O(n²)`, embora o pivô aleatório reduza a probabilidade de partições persistentemente desfavoráveis.
-- Tempos de execução podem variar entre máquinas e ambientes. O relatório deverá registrar a configuração usada e comparar os métodos sobre as mesmas entradas.
-
 ## Estrutura do repositório
 
 ```text
@@ -99,12 +88,3 @@ No estado atual, esse comando informa que o benchmark está pendente e não prod
 ├── RELATORIO.md
 └── README.md
 ```
-
-## Referências
-
-- Material da disciplina. **Aula 13 — Ordenação linear**. PDF fornecido para a atividade, 22 out. 2026. Base para a análise de ordenação por contagem (`O(n + k)`), ordenação por base (`O(d · n)`) e estabilidade das passadas.
-- CORMEN, Thomas H.; LEISERSON, Charles E.; RIVEST, Ronald L.; STEIN, Clifford. **Introduction to Algorithms**. 4. ed. Cambridge: The MIT Press, 2022. [Página da editora](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/).
-- Python Software Foundation. **`unittest` — Unit testing framework**, documentação do Python 3.12. [Documentação oficial](https://docs.python.org/3.12/library/unittest.html).
-- Python Software Foundation. **`timeit` — Measure execution time of small code snippets**, documentação do Python 3.12. [Documentação oficial](https://docs.python.org/3.12/library/timeit.html).
-- Git Project. **`git-clone`**, documentação oficial. [Manual do comando](https://git-scm.com/docs/git-clone.html).
-
