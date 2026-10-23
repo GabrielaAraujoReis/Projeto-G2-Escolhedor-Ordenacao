@@ -1,108 +1,110 @@
-# Projeto G2 - Escolhedor de Ordenacao
+# Projeto G2 — Escolhedor de Ordenação
 
-Projeto em dupla da disciplina de **Estruturas de Dados Avancadas**, com entrega prevista para 29/10.
+Este projeto implementa um ordenador que seleciona um algoritmo conforme as características da lista de entrada. A seleção será comparada com seis métodos fixos em quatro cenários, avaliando também o custo de analisar os dados.
 
-## Objetivo
+> **Situação:** estrutura inicial do trabalho acadêmico em dupla. As implementações e os resultados experimentais ainda estão pendentes.
 
-Construir um ordenador que analisa uma lista de inteiros, escolhe automaticamente o metodo mais adequado e executa a ordenacao. A escolha sera comparada, nos mesmos dados, com seis metodos fixos:
+## Decisões de arquitetura
 
-- insercao;
-- intercalacao;
-- rapida com pivo aleatorio;
-- hibrida (rapida + insercao);
-- contagem;
-- base (Radix Sort).
+Os algoritmos ficam em módulos separados dentro de `algoritmos/`, enquanto `escolher.py` concentra a decisão automática e `medir.py` concentra os experimentos. Essa separação permite testar e comparar cada método de forma independente.
 
-O projeto esta na fase de **estrutura inicial**. Os algoritmos, as regras do escolhedor e as medicoes ainda serao implementados e validados. Nenhum resultado experimental foi preenchido antecipadamente.
+O projeto prevê funções que recebem uma lista de inteiros e retornam uma nova lista ordenada. A entrada original deverá permanecer inalterada, facilitando a execução dos métodos sobre cópias equivalentes dos mesmos dados.
 
-## Estrutura do repositorio
+| Método | Justificativa para inclusão | Custo teórico esperado |
+|---|---|---|
+| Inserção | Adequada a entradas pequenas ou quase ordenadas; será avaliada como alternativa para trechos curtos. | Melhor caso `O(n)`; pior caso `O(n²)`. |
+| Intercalação (Merge Sort) | Referência por comparação com tempo `O(n log n)` e comportamento previsível; requer memória auxiliar `O(n)`. | `O(n log n)` em tempo. |
+| Rápida com pivô aleatório | Método por comparação com desempenho esperado `O(n log n)`; o pior caso continua sendo `O(n²)`. | Esperado `O(n log n)`; pior caso `O(n²)`. |
+| Híbrida | Combina Quicksort em trechos maiores com Inserção em trechos pequenos; o ponto de troca deverá ser avaliado experimentalmente. | Depende do corte e da entrada. |
+| Contagem (Counting Sort) | Explora chaves inteiras em uma faixa limitada; o custo e a memória dependem da amplitude da faixa `k`. | `O(n + k)` em tempo e memória auxiliar proporcional a `k`. |
+| Base (Radix Sort) | Permite tratar inteiros de faixa ampla por dígitos; cada passada precisa ser estável. | `O(d · n)`, sendo `d` a quantidade de dígitos processados. |
 
-```text
-.
-|-- algoritmos/
-|   |-- __init__.py
-|   |-- insercao.py
-|   |-- intercalacao.py
-|   |-- rapida.py
-|   |-- hibrida.py
-|   |-- contagem.py
-|   `-- base.py
-|-- resultados/
-|   `-- .gitkeep
-|-- escolher.py
-|-- medir.py
-|-- testes.py
-|-- RELATORIO.md
-`-- README.md
+O seletor deverá extrair tamanho, mínimo, máximo e uma medida simples de desordem em uma única passagem, sempre que possível. Isso reduz o custo da decisão. A ordenação por contagem só deverá ser considerada quando a faixa estimada respeitar um limite seguro de memória. Os limites e as regras finais serão definidos a partir dos experimentos.
+
+## Pré-requisitos
+
+- Python **3.12.14** como versão de referência deste projeto;
+- Git **2.53.0.windows.3** no ambiente Windows usado para configurar o repositório;
+- nenhuma biblioteca externa nesta estrutura inicial: os arquivos usam apenas a biblioteca padrão do Python.
+
+Os arquivos declaram tipos como `list[int]`, disponíveis a partir do Python 3.9. Para reproduzir os resultados nas mesmas condições, deve-se utilizar Python 3.12.14. A versão do Git registrada acima documenta o ambiente de configuração; o programa Python não depende do Git durante a execução.
+
+## Execução
+
+Clone o repositório e entre na pasta do projeto:
+
+```bash
+git clone https://github.com/GabrielaAraujoReis/Projeto-G2-Escolhedor-Ordenacao.git
+cd Projeto-G2-Escolhedor-Ordenacao
 ```
 
-## Planejamento tecnico
+Confirme a versão do Python:
 
-`escolher(v)` devera observar somente caracteristicas baratas da entrada, como:
+```bash
+python --version
+```
 
-- quantidade de elementos;
-- menor e maior valor, para estimar a faixa;
-- quantidade de pares consecutivos fora de ordem, como aproximacao do grau de ordenacao.
+A saída esperada para o ambiente de referência é:
 
-Sempre que possivel, essas informacoes serao obtidas em **uma unica passagem**. Isso evita que o custo da decisao elimine o ganho da ordenacao escolhida.
+```text
+Python 3.12.14
+```
 
-Antes de selecionar a ordenacao por contagem, o programa devera limitar a faixa de valores. Esse metodo custa `O(n + k)` e usa memoria proporcional a `k`, portanto uma faixa muito grande pode tornar sua execucao lenta ou ate inviavel. A ordenacao por base sera estudada como alternativa para inteiros com faixa ampla; suas passadas por digito precisam ser estaveis.
+No Windows, caso o comando `python` não esteja disponível, pode-se usar o inicializador `py -3.12` nos comandos seguintes.
 
-As regras definitivas e seus limites serao definidos a partir das medicoes, nao por suposicao.
-
-## Cenarios obrigatorios
-
-O benchmark comparara o ordenador automatico e os seis metodos fixos em quatro cenarios:
-
-1. lista aleatoria com chaves grandes;
-2. lista com faixa estreita de valores;
-3. lista quase ordenada;
-4. lista minuscula.
-
-Cada execucao devera usar copias dos mesmos dados de entrada para manter a comparacao justa.
-
-## Testes obrigatorios
-
-Os testes cobrirao:
-
-- lista vazia;
-- lista com um elemento;
-- todos os valores iguais;
-- lista ja ordenada;
-- lista invertida;
-- valores negativos.
-
-Quando a implementacao estiver pronta, execute:
+Execute a suíte de testes:
 
 ```bash
 python -m unittest -v testes.py
 ```
 
-## Como refazer as medicoes
+Na estrutura atual, a classe de testes fica marcada como ignorada porque os seis algoritmos ainda são esqueletos. Portanto, a execução confirma apenas que a suíte pode ser carregada; ela não valida a ordenação. Após a implementação, os testes deverão cobrir lista vazia, um elemento, valores iguais, lista ordenada, lista invertida e valores negativos.
 
-Depois da implementacao dos algoritmos e do benchmark:
+Após implementar os algoritmos, o seletor e os cenários do benchmark, as medições serão executadas com:
 
 ```bash
 python medir.py
 ```
 
-O programa devera registrar em `resultados/` os dados brutos usados no `RELATORIO.md`. Para reduzir ruido, cada caso sera repetido varias vezes e o relatorio informara o tamanho das listas, a semente aleatoria, a quantidade de repeticoes e a medida de tempo escolhida.
+No estado atual, esse comando informa que o benchmark está pendente e não produz resultados. Os dados experimentais deverão ser registrados em `resultados/` antes de preencher a tabela do [relatório](RELATORIO.md).
 
-## Etapas sugeridas
+## Limitações conhecidas
 
-1. Implementar e testar os seis metodos.
-2. Medir caracteristicas das entradas em uma passagem.
-3. Definir e implementar `escolher(v)` e `ordenar(v)`.
-4. Executar os quatro cenarios contra todos os metodos.
-5. Registrar os resultados e concluir o relatorio.
+- Os seis módulos de algoritmo ainda contêm apenas as interfaces; nenhuma ordenação está implementada.
+- `escolher(v)` ainda não possui regras de seleção; por isso `ordenar(v)` ainda não pode ordenar uma entrada.
+- `medir.py` ainda não gera as listas dos quatro cenários nem mede tempos.
+- Os testes estão intencionalmente ignorados até a implementação dos métodos; não devem ser interpretados como aprovação funcional.
+- A ordenação por contagem pode exigir memória excessiva se `k` for grande. O seletor deverá verificar a faixa antes de escolher esse método.
+- O tratamento de valores negativos na ordenação por base ainda deverá ser definido e testado.
+- A ordenação rápida pode atingir o pior caso `O(n²)`, embora o pivô aleatório reduza a probabilidade de partições persistentemente desfavoráveis.
+- Tempos de execução podem variar entre máquinas e ambientes. O relatório deverá registrar a configuração usada e comparar os métodos sobre as mesmas entradas.
 
-## Situacao atual
+## Estrutura do repositório
 
-- [x] Estrutura inicial do repositorio
-- [x] Roteiro inicial do relatorio
-- [ ] Implementacao dos seis metodos
-- [ ] Implementacao do escolhedor
-- [ ] Testes completos
-- [ ] Medicoes reproduziveis
-- [ ] Analise final
+```text
+.
+├── algoritmos/
+│   ├── __init__.py
+│   ├── insercao.py
+│   ├── intercalacao.py
+│   ├── rapida.py
+│   ├── hibrida.py
+│   ├── contagem.py
+│   └── base.py
+├── resultados/
+│   └── .gitkeep
+├── escolher.py
+├── medir.py
+├── testes.py
+├── RELATORIO.md
+└── README.md
+```
+
+## Referências
+
+- Material da disciplina. **Aula 13 — Ordenação linear**. PDF fornecido para a atividade, 22 out. 2026. Base para a análise de ordenação por contagem (`O(n + k)`), ordenação por base (`O(d · n)`) e estabilidade das passadas.
+- CORMEN, Thomas H.; LEISERSON, Charles E.; RIVEST, Ronald L.; STEIN, Clifford. **Introduction to Algorithms**. 4. ed. Cambridge: The MIT Press, 2022. [Página da editora](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/).
+- Python Software Foundation. **`unittest` — Unit testing framework**, documentação do Python 3.12. [Documentação oficial](https://docs.python.org/3.12/library/unittest.html).
+- Python Software Foundation. **`timeit` — Measure execution time of small code snippets**, documentação do Python 3.12. [Documentação oficial](https://docs.python.org/3.12/library/timeit.html).
+- Git Project. **`git-clone`**, documentação oficial. [Manual do comando](https://git-scm.com/docs/git-clone.html).
 
