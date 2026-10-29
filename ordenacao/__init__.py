@@ -2,6 +2,8 @@
 
 from .insercao import insercao
 from .intercalacao import intercalacao
+from .rapida import rapida
+from .hibrida import hibrida
 
 # Os métodos fixos, na ordem em que aparecem nas tabelas.
 # Cada etapa do trabalho registra aqui os métodos novos; os testes de
@@ -9,4 +11,6 @@ from .intercalacao import intercalacao
 METODOS = {
     "insercao": insercao,
     "intercalacao": intercalacao,
+    "rapida": rapida,
+    "hibrida": hibrida,
 }
