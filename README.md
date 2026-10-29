@@ -1,90 +1,98 @@
-# Projeto G2 — Escolhedor de Ordenação
+# Ordenação adaptativa
 
-Este projeto implementa um ordenador que seleciona um algoritmo conforme as características da lista de entrada. A seleção será comparada com seis métodos fixos em quatro cenários, avaliando também o custo de analisar os dados.
+Trabalho em dupla de Estruturas de Dados Avançadas (entrega 29/10).
 
-> **Situação:** estrutura inicial do trabalho acadêmico em dupla. As implementações e os resultados experimentais ainda estão pendentes.
+Nenhum método de ordenação ganha sempre. Este repositório reúne os seis
+métodos do semestre, um `escolher(v)` que olha a lista e decide qual deles
+usar, e as medições que mostram que `ordenar(v)` fica perto do melhor
+método em cada cenário, enquanto qualquer escolha fixa perde feio em
+pelo menos um.
 
-## Decisões de arquitetura
+O relatório completo está em [`RELATORIO.md`](RELATORIO.md).
 
-Os algoritmos ficam em módulos separados dentro de `algoritmos/`, enquanto `escolher.py` concentra a decisão automática e `medir.py` concentra os experimentos. Essa separação permite testar e comparar cada método de forma independente.
+## Integrantes
 
-O projeto prevê funções que recebem uma lista de inteiros e retornam uma nova lista ordenada. A entrada original deverá permanecer inalterada, facilitando a execução dos métodos sobre cópias equivalentes dos mesmos dados.
+- Gabriela de Araújo Reis
+- Euclides Carlos Pilon Neto
 
-| Método | Justificativa para inclusão | Custo teórico esperado |
-|---|---|---|
-| Inserção | Adequada a entradas pequenas ou quase ordenadas; será avaliada como alternativa para trechos curtos. | Melhor caso `O(n)`; pior caso `O(n²)`. |
-| Intercalação (Merge Sort) | Referência por comparação com tempo `O(n log n)` e comportamento previsível; requer memória auxiliar `O(n)`. | `O(n log n)` em tempo. |
-| Rápida com pivô aleatório | Método por comparação com desempenho esperado `O(n log n)`; o pior caso continua sendo `O(n²)`. | Esperado `O(n log n)`; pior caso `O(n²)`. |
-| Híbrida | Combina Quicksort em trechos maiores com Inserção em trechos pequenos; o ponto de troca deverá ser avaliado experimentalmente. | Depende do corte e da entrada. |
-| Contagem (Counting Sort) | Explora chaves inteiras em uma faixa limitada; o custo e a memória dependem da amplitude da faixa `k`. | `O(n + k)` em tempo e memória auxiliar proporcional a `k`. |
-| Base (Radix Sort) | Permite tratar inteiros de faixa ampla por dígitos; cada passada precisa ser estável. | `O(d · n)`, sendo `d` a quantidade de dígitos processados. |
+## Requisitos
 
-O seletor deverá extrair tamanho, mínimo, máximo e uma medida simples de desordem em uma única passagem, sempre que possível. Isso reduz o custo da decisão. A ordenação por contagem só deverá ser considerada quando a faixa estimada respeitar um limite seguro de memória. Os limites e as regras finais serão definidos a partir dos experimentos.
+Python 3.9 ou mais novo. Só a biblioteca padrão: não há nada para instalar.
 
-## Pré-requisitos
+## Uso
 
-- Python **3.12.14** como versão de referência deste projeto;
-- Git **2.53.0.windows.3** no ambiente Windows usado para configurar o repositório;
-- nenhuma biblioteca externa nesta estrutura inicial: os arquivos usam apenas a biblioteca padrão do Python.
+```python
+from ordenacao import ordenar, escolher
 
-Os arquivos declaram tipos como `list[int]`, disponíveis a partir do Python 3.9. Para reproduzir os resultados nas mesmas condições, deve-se utilizar Python 3.12.14. A versão do Git registrada acima documenta o ambiente de configuração; o programa Python não depende do Git durante a execução.
+ordenar([5, 3, 9, 1])          # [1, 3, 5, 9]
 
-## Execução
+e = escolher(lista)
+e.nome                          # 'contagem', 'base', 'insercao', ...
+e.motivo                        # 'inteiros com faixa estreita (k = 101 ≤ 2·n)'
+e.executar(lista)               # ordena com o método escolhido
+```
 
-Clone o repositório e entre na pasta do projeto:
+Os métodos também podem ser chamados diretamente
+(`from ordenacao import insercao, intercalacao, rapida, hibrida, contagem, base`)
+ou pelo dicionário `ordenacao.METODOS`. Todos devolvem uma lista nova e não
+alteram a entrada.
+
+## Estrutura
+
+```
+ordenacao/            os seis métodos, um por arquivo, e o escolhedor
+  insercao.py
+  intercalacao.py
+  rapida.py           pivô aleatório + partição em três
+  hibrida.py          rápida + inserção abaixo de 16 elementos
+  contagem.py         com guarda de memória (recusa faixas enormes)
+  base.py             radix LSD, dígitos de 8 bits
+  escolhedor.py       escolher(v) e ordenar(v)
+benchmarks/
+  cenarios.py         geradores de entrada, com semente fixa
+  cronometro.py       medição (mediana, coletor de lixo desligado)
+  calibrar.py         experimentos que definem as regras do escolher
+  medir.py            os 4 cenários x 6 métodos + ordenar
+  erro.py             o cenário em que o escolher erra
+resultados/           saídas dos scripts acima (markdown e csv)
+tests/                testes (unittest)
+```
+
+## Rodando os testes
 
 ```bash
-git clone https://github.com/GabrielaAraujoReis/Projeto-G2-Escolhedor-Ordenacao.git
-cd Projeto-G2-Escolhedor-Ordenacao
+python -m unittest -v
 ```
 
-Confirme a versão do Python:
+Cobrem, para todos os métodos e para o `ordenar`: lista vazia, um
+elemento, todos iguais, já ordenada, invertida, valores negativos, chaves
+enormes, além de centenas de listas aleatórias conferidas contra `sorted()`.
+Também testam que a contagem recusa faixas grandes *antes* de alocar
+memória, que a base é estável a cada passada, que a rápida não estoura a
+pilha com valores repetidos e que o escolhedor nunca manda reais ou faixas
+enormes para a contagem.
+
+## Refazendo as medições
+
+Sempre da raiz do repositório, com o computador o mais ocioso possível
+(feche navegador e IDE; em notebook, deixe na tomada):
 
 ```bash
-python --version
+python -m benchmarks.calibrar   # ~3 min  -> resultados/calibracao.md
+python -m benchmarks.medir      # ~1 min  -> resultados/cenarios.md e .csv
+python -m benchmarks.erro       # ~1 min  -> resultados/erro.md
 ```
 
-A saída esperada para o ambiente de referência é:
+- As entradas usam sementes fixas: todo mundo mede exatamente as mesmas listas.
+- Cada tempo é a **mediana** de no mínimo 5 execuções (até juntar 0,3 s);
+  chamadas muito rápidas são repetidas em lote e divididas, para o relógio
+  conseguir medir. O coletor de lixo fica desligado durante a medição.
+- A inserção no cenário aleatório leva mais de um segundo por execução:
+  é de propósito (é O(n²)).
+- Os tempos absolutos mudam de máquina para máquina; as **razões** entre os
+  métodos (quem ganha e por quanto) mudam bem menos. Em máquina virtual ou
+  compartilhada, espere ±10–20 % de ruído entre execuções.
 
-```text
-Python 3.12.14
-```
-
-No Windows, caso o comando `python` não esteja disponível, pode-se usar o inicializador `py -3.12` nos comandos seguintes.
-
-Execute a suíte de testes:
-
-```bash
-python -m unittest -v testes.py
-```
-
-Na estrutura atual, a classe de testes fica marcada como ignorada porque os seis algoritmos ainda são esqueletos. Portanto, a execução confirma apenas que a suíte pode ser carregada; ela não valida a ordenação. Após a implementação, os testes deverão cobrir lista vazia, um elemento, valores iguais, lista ordenada, lista invertida e valores negativos.
-
-Após implementar os algoritmos, o seletor e os cenários do benchmark, as medições serão executadas com:
-
-```bash
-python medir.py
-```
-
-No estado atual, esse comando informa que o benchmark está pendente e não produz resultados. Os dados experimentais deverão ser registrados em `resultados/` antes de preencher a tabela do [relatório](RELATORIO.md).
-
-## Estrutura do repositório
-
-```text
-.
-├── algoritmos/
-│   ├── __init__.py
-│   ├── insercao.py
-│   ├── intercalacao.py
-│   ├── rapida.py
-│   ├── hibrida.py
-│   ├── contagem.py
-│   └── base.py
-├── resultados/
-│   └── .gitkeep
-├── escolher.py
-├── medir.py
-├── testes.py
-├── RELATORIO.md
-└── README.md
-```
+Se rodarem `calibrar` numa máquina muito diferente e algum ponto de virada
+mudar, os limiares ficam todos no topo de `ordenacao/escolhedor.py`, cada
+um com a referência da seção da calibração de onde veio.
